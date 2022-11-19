@@ -80,12 +80,13 @@ for i in range(10):
 df = pd.DataFrame(pd_data, columns=ela_meta_keys+["problem_id"])
 print(df)
 # Draw Plot
+n = 5
 joypy.joyplot(df,
-              column=[ela_meta_keys[5]],
+              column=[ela_meta_keys[n]],
               by="problem_id",
-              #   ylim='own',
+              ylim='own',
               #   color=["#1f77b4d0"],
-              #   title="Distribution of inplace sorting time consuming, $N=10000$.",
+              title=ela_meta_keys[n],
               figsize=(10, 6))
 # rect1 = plt.Rectangle((0, 0), 0, 0, color='#1f77b4d0',
 #                       label=ela_meta_keys[0])
