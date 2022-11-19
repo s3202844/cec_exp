@@ -1,0 +1,1 @@
+cd build/ && make && cd .. && ./bin/cec_test
