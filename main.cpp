@@ -72,5 +72,6 @@ int main()
             y_sets_scale.push_back(y_scale);
         }
         write_y(y_sets, "origin_" + to_string(problem_id));
+        write_y(y_sets_scale, "scale_2_" + to_string(problem_id));
     }
 }
