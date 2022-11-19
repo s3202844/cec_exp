@@ -52,10 +52,12 @@ Y = []
 for i in range(1, 6):
     y = read_y("results/origin_"+str(i)+".txt")
     Y += [y]
+    y = read_y("results/scale_2_"+str(i)+".txt")
+    Y += [y]
 Y = np.array(Y)
 
 dataset = []
-for i in range(5):
+for i in range(10):
     dataset += [[]]
     for j in range(100):
         dataset[i] += [[]]
@@ -65,22 +67,25 @@ for i in range(5):
 
 
 pd_data = []
-for i in range(5):
+for i in range(10):
     for j in range(100):
         pd_data += [[]]
         for k in range(10):
             pd_data[-1] += [dataset[i][j][k]]
-        pd_data[-1] += [str(i+1)]
+        if i % 2 == 0:
+            pd_data[-1] += [str(i/2+1)]
+        else:
+            pd_data[-1] += [str((i-1)/2+1)+"_scale"]
 
 df = pd.DataFrame(pd_data, columns=ela_meta_keys+["problem_id"])
 print(df)
 # Draw Plot
 joypy.joyplot(df,
-              column=ela_meta_keys[:1],
+              column=[ela_meta_keys[5]],
               by="problem_id",
-            #   ylim='own',
-            #   color=["#1f77b4d0"],
-            #   title="Distribution of inplace sorting time consuming, $N=10000$.",
+              #   ylim='own',
+              #   color=["#1f77b4d0"],
+              #   title="Distribution of inplace sorting time consuming, $N=10000$.",
               figsize=(10, 6))
 # rect1 = plt.Rectangle((0, 0), 0, 0, color='#1f77b4d0',
 #                       label=ela_meta_keys[0])
@@ -89,5 +94,5 @@ joypy.joyplot(df,
 # plt.gca().add_patch(rect1)
 # plt.gca().add_patch(rect2)
 plt.legend()
-plt.savefig("ela_meta.png")
+plt.savefig("results/ela_meta.png")
 plt.cla()
