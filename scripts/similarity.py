@@ -29,7 +29,7 @@ for i in range(records_np.shape[1]-2):
         if records.columns[i+2] not in keys:
             keys += [records.columns[i+2]]
         if math.isinf(dist):
-            values[j] += [-1]
+            values[j] += [-0.2]
         else:
             values[j] += [-dist]
         if math.isinf(dist):
