@@ -111,29 +111,31 @@ table_name = "experiment_subtract"
 # read experiments results
 X = np.array(read_x(num_sampling, num_x))
 Y = []
-for file_name in file_list[:1]:
+for file_name in file_list:
     file_path = "results/data/subtract/" + file_name
     y = read_y(file_path, num_sampling, num_x)
     Y += [y]
     print("Read file:", file_path)
 Y = np.array(Y)
-# print(Y[0].shape)
-# print(X.shape)
 
-calculate_features(X[0], Y[0][0])
-
+is_write = False
+keys, _ = calculate_features(X[0], Y[0][0])
+column_names = ["problem_id", "experiment_id",
+                "subtract_lim", "is_subtract"] + keys
 # create table
-dataset = []
-for file_ind in range(len(file_list)):
+for file_ind in range(Y.shape[0]):
+    if experiment_ids[file_ind] > 2:
+        continue
     for i in range(num_sampling):
-        record = [problem_ids[file_ind], experiment_ids[file_ind],
-                  subtract_lims[file_ind], is_subtracts[file_ind]]
+        # for i in range(2):
         keys, values = calculate_features(X[i], Y[file_ind][i])
-        record += values
-        print(record)
-        dataset += [record]
-
-# save table
-column_names = ["problem_id", "experiment_id", "subtract_lim", "is_subtract"] + keys
-dataset_df = pd.DataFrame(dataset, columns=column_names)
-dataset_df.to_csv("results/"+table_name+".csv")
+        record = [problem_ids[file_ind], experiment_ids[file_ind],
+                  subtract_lims[file_ind], is_subtracts[file_ind]] + values
+        dataset_df = pd.DataFrame([record], columns=column_names)
+        if not is_write:
+            dataset_df.to_csv("results/"+table_name+".csv")
+            is_write = True
+        else:
+            dataset_df.to_csv("results/"+table_name+".csv",
+                              header=False, mode="a")
+        print(file_list[file_ind] + " sample " + str(i) + " done.")
