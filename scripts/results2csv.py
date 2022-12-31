@@ -92,50 +92,61 @@ def calculate_features(X, y):
 num_sampling = 100
 num_x = 1000
 dim = 10
+data_path = "results/data/scale/"
+table_name = "experiment_scale"
 
 # collect basic data for table
 problem_ids = []
 experiment_ids = []
 subtract_lims = []
+rotate_lims = []
+scale_factors = []
 is_subtracts = []
-file_list = os.listdir("results/data/subtract")
+is_rotates = []
+is_scales = []
+file_list = os.listdir(data_path)
 for file_name in file_list:
     match_obj = re.match(
-        r"(\d+)_(\d+)_(\d+\.\d+)_(\d+\.\d+)_(\d+)_(\d+)\.txt", file_name)
+        r"(\d+)_(\d+)_(\d+\.\d+)_(\d+\.\d+)_(\d+\.\d+)_(\d+)_(\d+)_(\d+)\.txt",
+        file_name)
     problem_ids += [int(match_obj.group(1))]
     experiment_ids += [int(match_obj.group(2))]
     subtract_lims += [float(match_obj.group(3))]
-    is_subtracts += [int(match_obj.group(5))]
-table_name = "experiment_subtract"
+    rotate_lims += [float(match_obj.group(4))]
+    scale_factors += [float(match_obj.group(5))]
+    is_subtracts += [float(match_obj.group(6))]
+    is_rotates += [float(match_obj.group(7))]
+    is_scales += [float(match_obj.group(8))]
 
 # read experiments results
 X = np.array(read_x(num_sampling, num_x))
 Y = []
 for file_name in file_list:
-    file_path = "results/data/subtract/" + file_name
+    file_path = data_path + file_name
     y = read_y(file_path, num_sampling, num_x)
     Y += [y]
     print("Read file:", file_path)
 Y = np.array(Y)
 
+# create table
 is_write = False
 keys, _ = calculate_features(X[0], Y[0][0])
-column_names = ["problem_id", "experiment_id",
-                "subtract_lim", "is_subtract"] + keys
-# create table
+column_names = ["problem_id", "experiment_id", "subtract_lim", "rotate_lim",
+                "scale_factor", "is_subtract", "is_rotate", "is_scale"] + keys
 for file_ind in range(Y.shape[0]):
     if experiment_ids[file_ind] > 2:
         continue
     for i in range(num_sampling):
-        # for i in range(2):
         keys, values = calculate_features(X[i], Y[file_ind][i])
         record = [problem_ids[file_ind], experiment_ids[file_ind],
-                  subtract_lims[file_ind], is_subtracts[file_ind]] + values
+                  subtract_lims[file_ind], rotate_lims[file_ind],
+                  scale_factors[file_ind], is_subtracts[file_ind],
+                  is_rotates[file_ind], is_scales[file_ind]] + values
         dataset_df = pd.DataFrame([record], columns=column_names)
         if not is_write:
-            dataset_df.to_csv("results/"+table_name+".csv")
+            dataset_df.to_csv("results/"+table_name+".csv", index=False)
             is_write = True
         else:
-            dataset_df.to_csv("results/"+table_name+".csv",
+            dataset_df.to_csv("results/"+table_name+".csv", index=False,
                               header=False, mode="a")
         print(file_list[file_ind] + " sample " + str(i) + " done.")
