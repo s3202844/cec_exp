@@ -79,7 +79,7 @@ void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
     }
     ofstream fout;
     stringstream ss;
-    ss << "../results/data/" << to_string(problem_id) << "_"
+    ss << "../results/data/scale/" << to_string(problem_id) << "_"
        << to_string(experiment_id) << "_" << to_string(subtract_lim) << "_"
        << to_string(rotate_lim) << "_" << to_string(scale_factor) << "_"
        << to_string(isSubstract) << "_" << to_string(isRotate) << "_"

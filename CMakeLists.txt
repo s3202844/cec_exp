@@ -13,3 +13,6 @@ find_package(ioh REQUIRED)
 
 add_executable(cec_test main.cpp)
 target_link_libraries(cec_test ioh::ioh)
+
+add_executable(rotation_matrix rotation_matrix.cpp)
+target_link_libraries(rotation_matrix ioh::ioh)
