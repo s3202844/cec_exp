@@ -12,7 +12,7 @@ const int dim = 10;
 void read_x(vector<vector<vector<double>>> &x_sets)
 {
     ifstream fin;
-    fin.open("../results/samplingX.txt", ios::in);
+    fin.open("../thesis_data/samplingX.txt", ios::in);
     double read_cache;
     string header;
     for (int i = 0; i < num_sampling; i++)
@@ -36,16 +36,39 @@ void read_x(vector<vector<vector<double>>> &x_sets)
     fin.close();
 }
 
+void read_rotation(vector<vector<double>> &matrix, string file_path, int dim)
+{
+    ifstream fin;
+    cout << file_path << endl;
+    fin.open(file_path, ios::in);
+    if (!fin)
+        perror("Error: Cannot open input file for reading");
+    for (int i = 0; i < dim; i++)
+    {
+        vector<double> tmp;
+        for (int j = 0; j < dim; j++)
+        {
+            double num;
+            fin >> num;
+            tmp.push_back(num);
+        }
+        matrix.push_back(tmp);
+    }
+}
+
 void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
                 int experiment_id = 0, double subtract_lim = 0.,
                 double rotate_lim = 0., double scale_factor = 1.,
                 bool isSubstract = false, bool isRotate = false,
-                bool isScale = false)
+                bool isScale = false, string matrix_path = "")
 {
     const auto &problem_factory =
         ioh::problem::ProblemRegistry<ioh::problem::CEC2022>::instance();
     auto problem = problem_factory.create(problem_id, 1, dim);
     vector<vector<double>> y_sets;
+    vector<vector<double>> rotation_matrix;
+    if (isRotate)
+        read_rotation(rotation_matrix, matrix_path, 10);
     for (int i = 0; i < num_sampling; i++)
     {
         vector<double> y;
@@ -60,13 +83,19 @@ void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
                                      subtract_lim / 100.);
                 subtract(tempx, offset);
             }
-            // if (isRotate)
-            // {
-            //     int angle = rand() % 180;
-            //     double theta = angle / 180. * M_PI;
-            //     vector<double> m = {cos(theta), -sin(theta), sin(theta),
-            //                         cos(theta)};
-            // }
+            if (isRotate)
+            {
+                vector<double> cacheX(tempx);
+                for (int m = 0; m < dim; m++)
+                {
+                    tempx.at(m) = 0;
+                    for (int n = 0; n < dim; n++)
+                    {
+                        tempx.at(m) =
+                            tempx.at(m) + cacheX.at(n) * rotation_matrix[m][n];
+                    }
+                }
+            }
             if (isScale)
             {
                 for (int k = 0; k < dim; k++)
@@ -79,7 +108,7 @@ void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
     }
     ofstream fout;
     stringstream ss;
-    ss << "../results/data/scale/" << to_string(problem_id) << "_"
+    ss << "../thesis_data/rotation/" << to_string(problem_id) << "_"
        << to_string(experiment_id) << "_" << to_string(subtract_lim) << "_"
        << to_string(rotate_lim) << "_" << to_string(scale_factor) << "_"
        << to_string(isSubstract) << "_" << to_string(isRotate) << "_"
@@ -96,44 +125,6 @@ void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
     fout.close();
 }
 
-void compute_rotation(const long rotation_seed, const int n_variables)
-{
-    const auto random_vector = ioh::common::random::bbob2009::normal(
-        static_cast<size_t>(n_variables) * n_variables, rotation_seed);
-    auto matrix = std::vector<std::vector<double>>(
-        n_variables, std::vector<double>(n_variables));
-
-    // reshape
-    for (auto i = 0; i < n_variables; i++)
-        for (auto j = 0; j < n_variables; j++)
-            matrix[i][j] =
-                random_vector.at(static_cast<size_t>(j) * n_variables + i);
-
-
-    /*1st coordinate is row, 2nd is column.*/
-    for (long i = 0; i < n_variables; i++)
-    {
-        for (long j = 0; j < i; j++)
-        {
-            auto prod = 0.0;
-            for (auto k = 0; k < n_variables; k++)
-                prod += matrix[k][i] * matrix[k][j];
-
-            for (auto k = 0; k < n_variables; k++)
-                matrix[k][i] -= prod * matrix[k][j];
-        }
-        auto prod = 0.0;
-        for (auto k = 0; k < n_variables; k++)
-            prod += matrix[k][i] * matrix[k][i];
-
-        for (auto k = 0; k < n_variables; k++)
-            matrix[k][i] /= sqrt(prod);
-    }
-    for (int i = 0; i < matrix[0].size(); i++)
-        cout << matrix[0][i] << " ";
-    cout << endl;
-    // return matrix;
-}
 
 int main()
 {
@@ -141,8 +132,6 @@ int main()
     vector<vector<vector<double>>> x_sets;
     read_x(x_sets);
 
-
-    // compute_rotation(114514, 10);
     // vector<double> factors;
     // int factor_size = 20;
     // for (int i = 0; i < factor_size; i++)
@@ -152,17 +141,21 @@ int main()
                               0.5,      1.,      2.,     4.,    8.,
                               16.,      32.,     64.,    128.};
 
+    vector<string> matrix_path;
+    for (int i = 0; i < 30; i++)
+    {
+        stringstream ss;
+        ss << "../thesis_data/rotation_matrix/" << i << "_rotation_10.txt";
+        matrix_path.push_back(ss.str());
+    }
 
     for (int problem_id = 1; problem_id <= 5; problem_id++)
     {
         experiment(x_sets, problem_id);
-        for (int factor_ind = 0; factor_ind < factors.size(); factor_ind++)
+        for (int matrix_ind = 0; matrix_ind < matrix_path.size(); matrix_ind++)
         {
-            // for (int experiment_id = 0; experiment_id < 10; experiment_id++)
-            // {
-            experiment(x_sets, problem_id, 0, 0.0, 0.0, factors[factor_ind],
-                       false, false, true);
-            // }
+            experiment(x_sets, problem_id, 0, 0.0, matrix_ind, 1.0, false, true,
+                       false, matrix_path[matrix_ind]);
         }
     }
 }
