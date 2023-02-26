@@ -7,12 +7,16 @@ using namespace ioh::problem::transformation::variables;
 
 const int num_sampling = 100;
 const int num_x = 1000;
-const int dim = 10;
+const int dim = 2;
+const string experiment_resutls_path = "results/experiment_rotation2D/";
 
 void read_x(vector<vector<vector<double>>> &x_sets)
 {
+    stringstream ss;
+    ss << setw(3) << setfill('0') << dim;
+    string dim_str = ss.str();
     ifstream fin;
-    fin.open("../thesis_data/samplingX.txt", ios::in);
+    fin.open("results/samplingX_" + dim_str + "D.txt", ios::in);
     double read_cache;
     string header;
     for (int i = 0; i < num_sampling; i++)
@@ -36,7 +40,7 @@ void read_x(vector<vector<vector<double>>> &x_sets)
     fin.close();
 }
 
-void read_rotation(vector<vector<double>> &matrix, string file_path, int dim)
+void read_rotation(double matrix[dim][dim], string file_path, int dim)
 {
     ifstream fin;
     cout << file_path << endl;
@@ -45,15 +49,12 @@ void read_rotation(vector<vector<double>> &matrix, string file_path, int dim)
         perror("Error: Cannot open input file for reading");
     for (int i = 0; i < dim; i++)
     {
-        vector<double> tmp;
         for (int j = 0; j < dim; j++)
         {
-            double num;
-            fin >> num;
-            tmp.push_back(num);
+            fin >> matrix[i][j];
         }
-        matrix.push_back(tmp);
     }
+    fin.close();
 }
 
 void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
@@ -66,7 +67,7 @@ void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
         ioh::problem::ProblemRegistry<ioh::problem::CEC2022>::instance();
     auto problem = problem_factory.create(problem_id, 1, dim);
     vector<vector<double>> y_sets;
-    vector<vector<double>> rotation_matrix;
+    double rotation_matrix[dim][dim];
     if (isRotate)
         read_rotation(rotation_matrix, matrix_path, 10);
     for (int i = 0; i < num_sampling; i++)
@@ -108,7 +109,7 @@ void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
     }
     ofstream fout;
     stringstream ss;
-    ss << "../thesis_data/rotation/" << to_string(problem_id) << "_"
+    ss << experiment_resutls_path << to_string(problem_id) << "_"
        << to_string(experiment_id) << "_" << to_string(subtract_lim) << "_"
        << to_string(rotate_lim) << "_" << to_string(scale_factor) << "_"
        << to_string(isSubstract) << "_" << to_string(isRotate) << "_"
@@ -132,30 +133,21 @@ int main()
     vector<vector<vector<double>>> x_sets;
     read_x(x_sets);
 
-    // vector<double> factors;
-    // int factor_size = 20;
-    // for (int i = 0; i < factor_size; i++)
-    //     factors.push_back((i + 1) * 100. / factor_size);
-
-    vector<double> factors = {0.015625, 0.03125, 0.0625, 0.125, 0.25,
-                              0.5,      1.,      2.,     4.,    8.,
-                              16.,      32.,     64.,    128.};
-
     vector<string> matrix_path;
     for (int i = 0; i < 30; i++)
     {
         stringstream ss;
-        ss << "../thesis_data/rotation_matrix/" << i << "_rotation_10.txt";
-        matrix_path.push_back(ss.str());
+        ss << setw(2) << setfill('0') << i;
+        string num_str = ss.str();
+        string path =
+            "results/rotation_matrix/2D/rotation_matrix_" + num_str + ".txt";
+        matrix_path.push_back(path);
     }
 
-    for (int problem_id = 1; problem_id <= 5; problem_id++)
+    experiment(x_sets, 1);
+    for (int matrix_ind = 0; matrix_ind < matrix_path.size(); matrix_ind++)
     {
-        experiment(x_sets, problem_id);
-        for (int matrix_ind = 0; matrix_ind < matrix_path.size(); matrix_ind++)
-        {
-            experiment(x_sets, problem_id, 0, 0.0, matrix_ind, 1.0, false, true,
-                       false, matrix_path[matrix_ind]);
-        }
+        experiment(x_sets, 1, 0, 0.0, matrix_ind, 1.0, false, true, false,
+                   matrix_path[matrix_ind]);
     }
 }
