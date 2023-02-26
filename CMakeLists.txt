@@ -16,3 +16,6 @@ target_link_libraries(cec_test ioh::ioh)
 
 add_executable(rotation_matrix rotation_matrix.cpp)
 target_link_libraries(rotation_matrix ioh::ioh)
+
+add_executable(rotation_matrix_2D rotation_matrix_2D.cpp)
+target_link_libraries(rotation_matrix)
