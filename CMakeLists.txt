@@ -19,3 +19,6 @@ target_link_libraries(rotation_matrix ioh::ioh)
 
 add_executable(rotation_matrix_2D rotation_matrix_2D.cpp)
 target_link_libraries(rotation_matrix)
+
+add_executable(porb1_rotation2D porb1_rotation2D.cpp)
+target_link_libraries(porb1_rotation2D ioh::ioh)
