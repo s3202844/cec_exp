@@ -144,10 +144,13 @@ int main()
         matrix_path.push_back(path);
     }
 
-    experiment(x_sets, 1);
-    for (int matrix_ind = 0; matrix_ind < matrix_path.size(); matrix_ind++)
+    for (int problem_id = 2; problem_id <= 5; problem_id++)
     {
-        experiment(x_sets, 1, 0, 0.0, matrix_ind, 1.0, false, true, false,
-                   matrix_path[matrix_ind]);
+        experiment(x_sets, problem_id);
+        for (int matrix_ind = 0; matrix_ind < matrix_path.size(); matrix_ind++)
+        {
+            experiment(x_sets, problem_id, 0, 0.0, matrix_ind, 1.0, false, true,
+                       false, matrix_path[matrix_ind]);
+        }
     }
 }
