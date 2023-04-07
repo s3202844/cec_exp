@@ -129,28 +129,52 @@ void experiment(vector<vector<vector<double>>> &x_sets, int problem_id,
 
 int main()
 {
-    CecUtils cec_utils;
-    vector<vector<vector<double>>> x_sets;
-    read_x(x_sets);
+    // CecUtils cec_utils;
+    // vector<vector<vector<double>>> x_sets;
+    // read_x(x_sets);
 
-    vector<string> matrix_path;
-    for (int i = 0; i < 30; i++)
-    {
-        stringstream ss;
-        ss << setw(2) << setfill('0') << i;
-        string num_str = ss.str();
-        string path =
-            "results/rotation_matrix/2D/rotation_matrix_" + num_str + ".txt";
-        matrix_path.push_back(path);
-    }
+    // vector<string> matrix_path;
+    // for (int i = 0; i < 30; i++)
+    // {
+    //     stringstream ss;
+    //     ss << setw(2) << setfill('0') << i;
+    //     string num_str = ss.str();
+    //     string path =
+    //         "results/rotation_matrix/2D/rotation_matrix_" + num_str + ".txt";
+    //     matrix_path.push_back(path);
+    // }
 
-    for (int problem_id = 2; problem_id <= 5; problem_id++)
+    // for (int problem_id = 2; problem_id <= 5; problem_id++)
+    // {
+    //     experiment(x_sets, problem_id);
+    //     for (int matrix_ind = 0; matrix_ind < matrix_path.size();
+    //     matrix_ind++)
+    //     {
+    //         experiment(x_sets, problem_id, 0, 0.0, matrix_ind, 1.0, false,
+    //         true,
+    //                    false, matrix_path[matrix_ind]);
+    //     }
+    // }
+    for (int problem_id = 1; problem_id <= 5; problem_id++)
     {
-        experiment(x_sets, problem_id);
-        for (int matrix_ind = 0; matrix_ind < matrix_path.size(); matrix_ind++)
+        std::string filename =
+            "results/landscape/F" + std::to_string(problem_id) + ".txt";
+        std::ofstream file(filename);
+        if (!file.is_open())
         {
-            experiment(x_sets, problem_id, 0, 0.0, matrix_ind, 1.0, false, true,
-                       false, matrix_path[matrix_ind]);
+            std::cerr << "Error: could not open file " << filename << std::endl;
+            return 1;
+        }
+        const auto &problem_factory =
+            ioh::problem::ProblemRegistry<ioh::problem::CEC2022>::instance();
+        auto problem = problem_factory.create(problem_id, 1, 2);
+        for (double x1 = -100.0; x1 <= 100.0; x1 += 0.5)
+        {
+            for (double x2 = -100.0; x2 <= 100.0; x2 += 0.5)
+            {
+                file << x1 << " " << x2 << " " << (*problem)({x1, x2})
+                     << std::endl;
+            }
         }
     }
 }
