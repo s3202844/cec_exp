@@ -29,7 +29,7 @@ def plot_contour(file_path, file_name, angle, ax):
     X = np.reshape(X, (n, n)).T
     Y = np.reshape(Y, (n, n)).T
     Z = np.reshape(Z, (n, n)).T
-    ax.contourf(X, Y, Z)
+    ax.contourf(X, Y, Z, cmap='terrain')
     ax.scatter(rec[0], rec[1], c="r", marker="x")
     ax.set_xticks([])
     ax.set_yticks([])
@@ -61,7 +61,7 @@ def plot_landscape(file_path, file_name, angle, ax):
     Z = np.reshape(Z, (n, n)).T
     # Plot the surface.
     ax.scatter(rec[0], rec[1], rec[2], c="r", marker="x")
-    ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    ax.plot_surface(X, Y, Z, cmap='terrain', linewidth=0, antialiased=False)
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_zticks([])
