@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 
 # 生成地形数据
 X = np.arange(-100, 100.5, 0.5)
@@ -19,7 +19,7 @@ for i in range(1, 6):
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.plot_surface(X, Y, Z, cmap='terrain')
+    ax.plot_surface(X, Y, Z, cmap=cm.coolwarm)
     # 隐藏z轴
     ax.set_zticks([])
     ax.view_init(elev=30, azim=45)
